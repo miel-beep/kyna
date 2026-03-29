@@ -14,15 +14,18 @@ use ratatui::style::{Style, Color, Modifier};
 use ratatui::{prelude::*, widgets::*};
 use ratatui::{DefaultTerminal, Frame};
 use std::fs::File;
+use std::path::PathBuf;
 
 struct Buffer {
-    text_file: String,
-
+    name_file: PathBuf,
+    text_file: String
 }
 
-pub fn start() -> std::io::Result<()> {
-    let mut string_file: String = std::fs::read_to_string("cudecachorro.txt").expect("erro");
-    let mut buffer = Buffer { 
+pub fn start(file: String) -> std::io::Result<()> {
+    let mut dir = PathBuf::from(file);
+    let mut string_file: String = std::fs::read_to_string(&dir).expect("erro");
+    let mut buffer = Buffer {
+         name_file: dir,
          text_file: string_file
     };
 
@@ -38,7 +41,7 @@ pub fn start() -> std::io::Result<()> {
         if let Event::Key(key) = event::read()? { 
            match key.code {
                KeyCode::Char('q') => {
-                    std::fs::write("cudecachorro.txt", buffer.text_file).unwrap();
+                    std::fs::write(buffer.name_file, buffer.text_file).unwrap();
                     stdout().execute(LeaveAlternateScreen)?;
                     disable_raw_mode()?;
                     break;
