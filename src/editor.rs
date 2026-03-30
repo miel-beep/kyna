@@ -1,4 +1,3 @@
-use buffer;
 use std::io::{stderr, stdout};
 
 use crossterm::ExecutableCommand;
@@ -13,15 +12,29 @@ use ratatui::{prelude::*, widgets::{Paragraph, Block, Wrap}};
 use ratatui::style::{Style, Color, Modifier};
 use ratatui::{prelude::*, widgets::*};
 use ratatui::{DefaultTerminal, Frame};
+use ratatui::layout::Position;
 use std::fs::File;
 use std::path::PathBuf;
+use ratatui::backend::Backend;
 
 struct Buffer {
     name_file: PathBuf,
     text_file: String
 }
 
+struct Cursor {
+    cursor_x: u16,
+    cursor_y: u16
+}
+
+
 pub fn start(file: String) -> std::io::Result<()> {
+    let mut backend = CrosstermBackend::new(stdout());
+    let mut terminal = Terminal::new(backend)?;
+
+    enable_raw_mode()?;
+    stdout().execute(EnterAlternateScreen)?;
+
     let mut dir = PathBuf::from(file);
     let mut string_file: String = std::fs::read_to_string(&dir).expect("erro");
     let mut buffer = Buffer {
@@ -29,15 +42,15 @@ pub fn start(file: String) -> std::io::Result<()> {
          text_file: string_file
     };
 
-    loop {
-        let backend = CrosstermBackend::new(stderr());
-        let mut terminal = Terminal::new(backend)?;
 
-        enable_raw_mode()?;
-        stdout().execute(EnterAlternateScreen)?;
-
+    loop { 
         terminal.clear()?;
         terminal.draw(|frame| render(&buffer, frame))?;
+        terminal.show_cursor()?;
+        terminal.set_cursor_position(Position {
+            x: 0,
+            y: 0
+        })?;
         if let Event::Key(key) = event::read()? { 
            match key.code {
                KeyCode::Char('q') => {

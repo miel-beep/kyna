@@ -1,5 +1,4 @@
 mod editor;
-mod buffer;
 
 use clap::Parser;
 
@@ -15,3 +14,5 @@ fn main() {
 
     editor::start(args.name);
 }
+
+
