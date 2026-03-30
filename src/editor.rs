@@ -19,7 +19,8 @@ use ratatui::backend::Backend;
 
 struct Buffer {
     name_file: PathBuf,
-    text_file: String
+    text_file: String,
+    cursor_pos: Cursor
 }
 
 struct Cursor {
@@ -39,7 +40,11 @@ pub fn start(file: String) -> std::io::Result<()> {
     let mut string_file: String = std::fs::read_to_string(&dir).expect("erro");
     let mut buffer = Buffer {
          name_file: dir,
-         text_file: string_file
+         text_file: string_file,
+         cursor_pos: Cursor {
+             cursor_x: 0,
+             cursor_y: 0
+         }
     };
 
 
@@ -48,8 +53,8 @@ pub fn start(file: String) -> std::io::Result<()> {
         terminal.draw(|frame| render(&buffer, frame))?;
         terminal.show_cursor()?;
         terminal.set_cursor_position(Position {
-            x: 0,
-            y: 0
+            x: buffer.cursor_pos.cursor_x,
+            y: buffer.cursor_pos.cursor_y
         })?;
         if let Event::Key(key) = event::read()? { 
            match key.code {
@@ -60,6 +65,14 @@ pub fn start(file: String) -> std::io::Result<()> {
                     break;
                 },
                 KeyCode::Char(c) => buffer.text_file.push(c),
+                KeyCode::Down => buffer.cursor_pos.cursor_y += 1, 
+                KeyCode::Up => if buffer.cursor_pos.cursor_y > 0 {
+                    buffer.cursor_pos.cursor_y -= 1
+                },
+                KeyCode::Right => buffer.cursor_pos.cursor_x += 1,
+                KeyCode::Left => if buffer.cursor_pos.cursor_x > 0 {
+                    buffer.cursor_pos.cursor_x -= 1
+                }
                 _ => {}
             }
         }
