@@ -14,4 +14,3 @@ fn main() {
 
     editor::start(args.name);
 }
-
