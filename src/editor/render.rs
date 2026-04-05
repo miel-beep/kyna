@@ -1,9 +1,8 @@
 use ratatui::{
     Frame,
-    layout::{Layout, Constraint, Direction, Rect},
+    layout::{Layout, Constraint, Direction, Rect, Position},
     style::{Color, Style},
-    widgets::{Block, Paragraph, Borders},
-    backend::Backend,
+    widgets::{Block, Paragraph},
 };
 
 use crate::editor::buffer::Buffer;
@@ -29,8 +28,8 @@ pub fn render(buffer: &Buffer, frame: &mut Frame, area: Rect) {
     frame.render_widget(editor, horizontal[1]);
 
 
-    frame.set_cursor(
-        horizontal[0].x + 5 + buffer.cursor.x,
-        horizontal[1].y + buffer.cursor.y,
-    );
+    frame.set_cursor_position(Position {
+        x: horizontal[1].x + buffer.cursor.x,
+        y: horizontal[1].y + buffer.cursor.y,
+    });
 }

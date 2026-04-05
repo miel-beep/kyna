@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use crate::config::TAB_SIZE;
+
 pub struct Cursor {
     pub x: u16,
     pub y: u16,
@@ -65,6 +67,27 @@ impl Buffer {
             self.cursor.x = self.lines[prev_y].chars().count() as u16;
             self.lines[prev_y].push_str(&current);
         }
+    }
+
+    pub fn handler_delete(&mut self) {
+        let x = self.cursor.x as usize;
+        let y = self.cursor.y as usize;
+
+        if x < self.lines[y].chars().count() {
+            let byte_idx = char_to_byte_idx(&self.lines[y], x);
+            self.lines[y].remove(byte_idx);
+        } else if y < self.lines.len() - 1 {
+            let current = self.lines.remove(y + 1);
+            self.lines[y].push_str(&current);
+        }
+    }
+
+    pub fn handler_tab(&mut self) {
+        let y = self.cursor.y as usize;
+        let x = self.cursor.x as usize;
+        let byte_idx = char_to_byte_idx(&self.lines[y], x);
+        self.lines[y].insert(byte_idx, '\t');
+        self.cursor.x += TAB_SIZE as u16;
     }
 
     pub fn move_up(&mut self) {

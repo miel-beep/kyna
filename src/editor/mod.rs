@@ -1,6 +1,8 @@
 mod buffer;
 mod render;
 
+
+
 use std::fs::File;
 use std::io::stdout;
 use std::path::PathBuf;
@@ -11,7 +13,7 @@ use crossterm::{
     event::{self, Event, KeyCode},
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
-use ratatui::{Terminal, backend::CrosstermBackend, layout::Position};
+use ratatui::{Terminal, backend::CrosstermBackend};
 
 pub fn start(file: String) -> std::io::Result<()> {
     let path = PathBuf::from(&file);
@@ -53,6 +55,8 @@ pub fn start(file: String) -> std::io::Result<()> {
                 KeyCode::Down      => buffer.move_down(),
                 KeyCode::Left      => buffer.move_left(),
                 KeyCode::Right     => buffer.move_right(),
+                KeyCode::Delete    => buffer.handler_delete(),
+                KeyCode::Tab       => buffer.handler_tab(),
                 _ => {}
             }
         }
