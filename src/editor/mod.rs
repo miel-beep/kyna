@@ -1,5 +1,6 @@
 mod buffer;
 mod render;
+mod ui;
 
 use std::fs::File;
 use std::io::stdout;
@@ -13,6 +14,12 @@ use crossterm::{
 };
 use ratatui::{Terminal, backend::CrosstermBackend, layout::Position};
 
+#[derive(Debug, PartialEq)]
+pub enum Modes {
+    Normal,
+    Insert,
+}
+
 pub fn start(file: String) -> std::io::Result<()> {
     let path = PathBuf::from(&file);
 
@@ -20,9 +27,15 @@ pub fn start(file: String) -> std::io::Result<()> {
         File::create(&path)?;
     }
 
+    let mut mode = Modes::Normal;
+
     let content = std::fs::read_to_string(&path)?;
     let lines: Vec<String> = content.lines().map(str::to_string).collect();
-    let lines = if lines.is_empty() { vec![String::new()] } else { lines };
+    let lines = if lines.is_empty() {
+        vec![String::new()]
+    } else {
+        lines
+    };
 
     let mut buffer = Buffer::new(path, lines);
 
@@ -32,31 +45,44 @@ pub fn start(file: String) -> std::io::Result<()> {
     let backend = CrosstermBackend::new(stdout());
     let mut terminal = Terminal::new(backend)?;
 
+    terminal.clear()?;
+    terminal.draw(|frame| render::render(&buffer, frame, frame.area()))?;
+    terminal.show_cursor()?;
+
     loop {
-        terminal.clear()?;
         terminal.draw(|frame| render::render(&buffer, frame, frame.area()))?;
         terminal.show_cursor()?;
 
-
         if let Event::Key(key) = event::read()? {
-            match key.code {
-                KeyCode::Char('q') => {
-                    buffer.save()?;
-                    stdout().execute(LeaveAlternateScreen)?;
-                    disable_raw_mode()?;
-                    break;
-                }
-                KeyCode::Char(c)   => buffer.insert_char(c),
-                KeyCode::Enter     => buffer.handle_enter(),
-                KeyCode::Backspace => buffer.handle_backspace(),
-                KeyCode::Up        => buffer.move_up(),
-                KeyCode::Down      => buffer.move_down(),
-                KeyCode::Left      => buffer.move_left(),
-                KeyCode::Right     => buffer.move_right(),
+            match mode {
+                Modes::Insert => match key.code {
+                    KeyCode::Char(c) => buffer.insert_char(c),
+                    KeyCode::Enter => buffer.handle_enter(),
+                    KeyCode::Backspace => buffer.handle_backspace(),
+                    KeyCode::Up => buffer.move_up(),
+                    KeyCode::Down => buffer.move_down(),
+                    KeyCode::Left => buffer.move_left(),
+                    KeyCode::Right => buffer.move_right(),
+                    KeyCode::Esc => mode = Modes::Normal,
+                    _ => {}
+                },
+                Modes::Normal => match key.code {
+                    KeyCode::Char('i') => mode = Modes::Insert,
+                    KeyCode::Up => buffer.move_up(),
+                    KeyCode::Down => buffer.move_down(),
+                    KeyCode::Left => buffer.move_left(),
+                    KeyCode::Right => buffer.move_right(),
+                    KeyCode::Char('q') => {
+                        buffer.save()?;
+                        stdout().execute(LeaveAlternateScreen)?;
+                        disable_raw_mode()?;
+                        break;
+                    }
+                    _ => {}
+                },
                 _ => {}
             }
         }
     }
-
     Ok(())
 }
