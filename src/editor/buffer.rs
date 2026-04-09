@@ -118,9 +118,9 @@ impl Buffer {
         }
     }
     pub fn get_breanch(&self) -> Option<String> {
-        let repo = Repository::open("/home/luis/miel/estudos/kyna").ok()?;
+        let repo = Repository::open(self.name.as_path()).ok()?;
         let head = repo.head().ok()?;
-        // shorthand() -> Option<&str>, então convertemos para String
+
         head.shorthand().map(|s| s.to_string())
     }
 }
