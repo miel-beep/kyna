@@ -17,9 +17,21 @@ struct Option {
 }
 
 const OPTIONS: &[Option] = &[
-    Option { name: "Open file",   icon: '→', shortcut: 'z' },
-    Option { name: "Create file", icon: '→', shortcut: 'b' },
-    Option { name: "Help",        icon: '→', shortcut: 's' },
+    Option {
+        name: "Open file",
+        icon: '→',
+        shortcut: 'z',
+    },
+    Option {
+        name: "Create file",
+        icon: '→',
+        shortcut: 'b',
+    },
+    Option {
+        name: "Help",
+        icon: '→',
+        shortcut: 's',
+    },
 ];
 
 pub fn home(terminal: &mut DefaultTerminal) -> std::io::Result<()> {

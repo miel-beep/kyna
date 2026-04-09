@@ -1,6 +1,8 @@
 mod buffer;
 mod render;
 mod ui;
+mod utils;
+
 
 use std::fs::File;
 use std::io::stdout;
@@ -14,7 +16,7 @@ use crossterm::{
 };
 use ratatui::{Terminal, backend::CrosstermBackend, layout::Position};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Modes {
     Normal,
     Insert,
@@ -26,8 +28,6 @@ pub fn start(file: String) -> std::io::Result<()> {
     if !path.exists() {
         File::create(&path)?;
     }
-
-    let mut mode = Modes::Normal;
 
     let content = std::fs::read_to_string(&path)?;
     let lines: Vec<String> = content.lines().map(str::to_string).collect();
@@ -54,7 +54,7 @@ pub fn start(file: String) -> std::io::Result<()> {
         terminal.show_cursor()?;
 
         if let Event::Key(key) = event::read()? {
-            match mode {
+            match buffer.mode {
                 Modes::Insert => match key.code {
                     KeyCode::Char(c) => buffer.insert_char(c),
                     KeyCode::Enter => buffer.handle_enter(),
@@ -63,11 +63,11 @@ pub fn start(file: String) -> std::io::Result<()> {
                     KeyCode::Down => buffer.move_down(),
                     KeyCode::Left => buffer.move_left(),
                     KeyCode::Right => buffer.move_right(),
-                    KeyCode::Esc => mode = Modes::Normal,
+                    KeyCode::Esc => buffer.mode = Modes::Normal,
                     _ => {}
                 },
                 Modes::Normal => match key.code {
-                    KeyCode::Char('i') => mode = Modes::Insert,
+                    KeyCode::Char('i') => buffer.mode = Modes::Insert,
                     KeyCode::Up => buffer.move_up(),
                     KeyCode::Down => buffer.move_down(),
                     KeyCode::Left => buffer.move_left(),

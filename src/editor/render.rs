@@ -1,18 +1,29 @@
 use ratatui::{
     Frame,
-    layout::{Layout, Constraint, Direction, Rect},
-    style::{Color, Style},
-    widgets::{Block, Paragraph, Borders},
     backend::Backend,
+    layout::{Constraint, Direction, Layout, Rect},
+    style::{Color, Style},
+    widgets::{Block, Borders, Paragraph},
 };
 
-use crate::editor::buffer::Buffer;
+use crate::editor::{
+    buffer::Buffer,
+    ui::{self, Ui},
+};
 
 pub fn render(buffer: &Buffer, frame: &mut Frame, area: Rect) {
+    let vertical = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Min(1), Constraint::Length(1)])
+        .split(area);
     let horizontal = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Length(5), Constraint::Min(1)])
-        .split(area);
+        .constraints([
+            Constraint::Length(5),
+            Constraint::Min(1),
+            Constraint::Length(1),
+        ])
+        .split(vertical[0]);
     let numbers: String = buffer
         .lines
         .iter()
@@ -23,12 +34,12 @@ pub fn render(buffer: &Buffer, frame: &mut Frame, area: Rect) {
         .style(Style::default().fg(Color::DarkGray))
         .block(Block::default());
     let content = buffer.lines.join("\n");
-    let editor = Paragraph::new(content)
-        .style(Style::default().fg(Color::White));
+    let editor = Paragraph::new(content).style(Style::default().fg(Color::White));
     frame.render_widget(gutter, horizontal[0]);
     frame.render_widget(editor, horizontal[1]);
 
-
+    let mut ui = Ui::new(buffer);
+    ui.side_bar(frame, vertical[1]);
     frame.set_cursor(
         horizontal[0].x + 5 + buffer.cursor.x,
         horizontal[1].y + buffer.cursor.y,

@@ -1,5 +1,9 @@
 use std::path::PathBuf;
 
+use git2::Repository;
+
+use crate::editor::Modes;
+
 pub struct Cursor {
     pub x: u16,
     pub y: u16,
@@ -9,6 +13,7 @@ pub struct Buffer {
     pub name: PathBuf,
     pub lines: Vec<String>,
     pub cursor: Cursor,
+    pub mode: Modes,
 }
 
 impl Buffer {
@@ -17,6 +22,7 @@ impl Buffer {
             name,
             lines,
             cursor: Cursor { x: 0, y: 0 },
+            mode: Modes::Normal,
         }
     }
 
@@ -110,6 +116,12 @@ impl Buffer {
         if self.cursor.x > line_len {
             self.cursor.x = line_len;
         }
+    }
+    pub fn get_breanch(&self) -> Option<String> {
+        let repo = Repository::open("/home/luis/miel/estudos/kyna").ok()?;
+        let head = repo.head().ok()?;
+        // shorthand() -> Option<&str>, então convertemos para String
+        head.shorthand().map(|s| s.to_string())
     }
 }
 
