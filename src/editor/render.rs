@@ -1,15 +1,11 @@
 use ratatui::{
     Frame,
-    backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, Paragraph},
 };
 
-use crate::editor::{
-    buffer::Buffer,
-    ui::{self, Ui},
-};
+use crate::editor::{buffer::Buffer, ui::Ui};
 
 pub fn render(buffer: &Buffer, frame: &mut Frame, area: Rect) {
     let vertical = Layout::default()
@@ -38,10 +34,10 @@ pub fn render(buffer: &Buffer, frame: &mut Frame, area: Rect) {
     frame.render_widget(gutter, horizontal[0]);
     frame.render_widget(editor, horizontal[1]);
 
-    let mut ui = Ui::new(buffer);
+    let ui = Ui::new(buffer);
     ui.side_bar(frame, vertical[1]);
-    frame.set_cursor(
+    frame.set_cursor_position((
         horizontal[0].x + 5 + buffer.cursor.x,
         horizontal[1].y + buffer.cursor.y,
-    );
+    ));
 }

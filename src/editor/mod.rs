@@ -3,7 +3,6 @@ mod render;
 mod ui;
 mod utils;
 
-
 use std::fs::File;
 use std::io::stdout;
 use std::path::PathBuf;
@@ -14,7 +13,7 @@ use crossterm::{
     event::{self, Event, KeyCode},
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
-use ratatui::{Terminal, backend::CrosstermBackend, layout::Position};
+use ratatui::{Terminal, backend::CrosstermBackend};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Modes {
@@ -80,7 +79,6 @@ pub fn start(file: String) -> std::io::Result<()> {
                     }
                     _ => {}
                 },
-                _ => {}
             }
         }
     }

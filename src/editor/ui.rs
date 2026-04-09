@@ -63,7 +63,6 @@ impl<'a> Ui<'a> {
 
         frame.render_widget(left, chunks[0]);
 
-
         if let Some(branch) = &branch {
             frame.render_widget(branch.clone(), chunks[1]);
         } else {
@@ -75,5 +74,4 @@ impl<'a> Ui<'a> {
         frame.render_widget(line_col, chunks[3]);
         frame.render_widget(file_info, chunks[2]);
     }
-
 }

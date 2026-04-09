@@ -46,8 +46,10 @@ impl Buffer {
         let x = self.cursor.x as usize;
         let y = self.cursor.y as usize;
 
-        let before = self.lines[y][..x].to_string();
-        let after = self.lines[y][x..].to_string();
+        let byte_idx = char_to_byte_idx(&self.lines[y], x);
+
+        let before = self.lines[y][..byte_idx].to_string();
+        let after = self.lines[y][byte_idx..].to_string();
 
         self.lines[y] = before;
         self.lines.insert(y + 1, after);
