@@ -1,77 +1,51 @@
-use ratatui::layout::{Alignment, Layout};
-use ratatui::text::Line;
-use ratatui::text::Span;
-use ratatui::widgets::Block;
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Rect},
-    style::{Color, Style},
-    widgets::Paragraph,
-};
+use ratatui::widgets::Widget;
 
-use crate::editor::buffer::Buffer;
-use crate::editor::utils::{get_icon, normalze_mode};
+use crate::editor::{KynaScene, SceneId};
 
-pub struct Ui<'a> {
-    buffer: &'a Buffer,
+pub struct KynaUi {
+    scenes: Vec<Box<dyn KynaScene>>,
+    current_scene: SceneId,
 }
 
-impl<'a> Ui<'a> {
-    pub fn new(buffer: &'a Buffer) -> Self {
-        Self { buffer }
-    }
-    pub fn side_bar(&self, frame: &mut Frame, area: Rect) {
-        let chunks = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints([
-                Constraint::Length(8),
-                Constraint::Min(0),
-                Constraint::Min(0),
-                Constraint::Length(13),
-            ])
-            .split(area);
-
-        let (icon, color) = get_icon(self.buffer.name.to_str().unwrap_or(""));
-        let line = Line::from(vec![
-            Span::styled(icon, Style::default().fg(color).bg(Color::Black)),
-            Span::styled(
-                format!(" {}", self.buffer.name.to_str().unwrap_or("")),
-                Style::default().bg(Color::Black).fg(Color::White),
-            ),
-        ]);
-        let file_info = Paragraph::new(line)
-            .block(Block::default().style(Style::default().bg(Color::Black)))
-            .alignment(Alignment::Right);
-
-        let left = Paragraph::new(normalze_mode(self.buffer.mode.clone()))
-            .style(Style::default().bg(Color::Black).fg(Color::White))
-            .block(Block::default().style(Style::default().bg(Color::Black)));
-
-        let line_col = Paragraph::new(format!(
-            " Ln {}, Col {}",
-            self.buffer.cursor.x, self.buffer.cursor.y
-        ))
-        .block(Block::default().style(Style::default().bg(Color::Black)))
-        .style(Style::default().bg(Color::Black).fg(Color::White));
-
-        let branch = self.buffer.get_breanch().map(|b| {
-            Paragraph::new(format!(" {}", b))
-                .alignment(Alignment::Left)
-                .block(Block::default().style(Style::default().bg(Color::Black)))
-                .style(Style::default().bg(Color::Black).fg(Color::White))
-        });
-
-        frame.render_widget(left, chunks[0]);
-
-        if let Some(branch) = &branch {
-            frame.render_widget(branch.clone(), chunks[1]);
-        } else {
-            let empty =
-                Paragraph::new("").block(Block::default().style(Style::default().bg(Color::Black)));
-            frame.render_widget(empty, chunks[1]);
+impl KynaUi {
+    pub fn new() -> Self {
+        Self {
+            scenes: vec![],
+            current_scene: SceneId(usize::MAX), //none
         }
+    }
 
-        frame.render_widget(line_col, chunks[3]);
-        frame.render_widget(file_info, chunks[2]);
+    #[inline]
+    ///Returns whether this ui has some ui active
+    pub fn has_active_scene(&self) -> bool {
+        self.current_scene.0 != usize::MAX
+    }
+    pub fn set_active_scene(&mut self, id: SceneId) {
+        self.current_scene = id;
+    }
+
+    pub fn get_active_scene(&mut self) -> Option<&mut Box<dyn KynaScene>> {
+        self.scenes.get_mut(self.current_scene.0)
+    }
+
+    pub fn add_scene<S: KynaScene + 'static>(&mut self, scene: S, active: bool) -> SceneId {
+        self.scenes.push(Box::new(scene));
+        let id = SceneId(self.scenes.len() - 1);
+        if active {
+            self.current_scene = id;
+        };
+        id
+    }
+}
+
+impl Widget for &KynaUi {
+    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
+    where
+        Self: Sized,
+    {
+        if self.has_active_scene() {
+            let scene = &*self.scenes[self.current_scene.0];
+            scene.render(area, buf);
+        }
     }
 }

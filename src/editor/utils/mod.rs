@@ -6,6 +6,7 @@ pub fn normalze_mode(mode: Modes) -> &'static str {
     match mode {
         Modes::Normal => "NORMAL",
         Modes::Insert => "INSERT",
+        Modes::Select => "SELECT",
     }
 }
 pub fn get_icon(file: &str) -> (&'static str, Color) {
