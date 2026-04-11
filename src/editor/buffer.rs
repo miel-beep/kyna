@@ -9,14 +9,15 @@ pub struct Cursor {
     pub y: u16,
 }
 
-pub struct Buffer {
+/// A Buffer used to handle the writes on a specific file
+pub struct FileBuffer {
     pub name: PathBuf,
     pub lines: Vec<String>,
     pub cursor: Cursor,
     pub mode: Modes,
 }
 
-impl Buffer {
+impl FileBuffer {
     pub fn new(name: PathBuf, lines: Vec<String>) -> Self {
         Self {
             name,

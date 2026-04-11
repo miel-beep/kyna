@@ -3,6 +3,8 @@ mod home;
 
 use clap::Parser;
 
+use crate::editor::KynaEditor;
+
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
@@ -16,11 +18,7 @@ fn main() -> color_eyre::Result<()> {
 
     let args = Args::parse();
 
-    if let Some(name) = args.name {
-        editor::start(name)?;
-    } else {
-        ratatui::run(home::home)?;
-    }
+    KynaEditor::new(args.name)?.run();
 
     Ok(())
 }
