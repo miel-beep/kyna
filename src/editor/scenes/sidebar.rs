@@ -21,9 +21,8 @@ impl Sidebar {
     }
 }
 
-impl KynaScene for Sidebar {}
-impl Widget for Sidebar {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
+impl KynaScene for Sidebar {
+    fn render(&self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
     where
         Self: Sized,
     {

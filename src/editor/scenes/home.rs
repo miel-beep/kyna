@@ -1,4 +1,9 @@
 use ratatui::{buffer::Buffer, widgets::Widget};
+use ratatui::{
+    layout::{Constraint, Direction, Layout, Rect},
+    style::{Color, Style},
+    widgets::{Block, Borders, Paragraph},
+};
 
 use crate::editor::KynaScene;
 
@@ -89,9 +94,8 @@ impl HomeScene {
     }
 }
 
-impl KynaScene for HomeScene {}
-impl Widget for HomeScene {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
+impl KynaScene for HomeScene {
+    fn render(&self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
     where
         Self: Sized,
     {
@@ -124,9 +128,3 @@ impl Widget for HomeScene {
         self.render_menu(inner, buf);
     }
 }
-
-use ratatui::{
-    layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Style},
-    widgets::{Block, Borders, Paragraph},
-};

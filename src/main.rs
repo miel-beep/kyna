@@ -1,5 +1,4 @@
 mod editor;
-mod home;
 
 use clap::Parser;
 

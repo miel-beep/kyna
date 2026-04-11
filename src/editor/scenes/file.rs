@@ -42,13 +42,7 @@ impl KynaScene for FileScene {
         };
         KynaCommand::None
     }
-}
-
-impl Widget for FileScene {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut Buffer)
-    where
-        Self: Sized,
-    {
+    fn render(&self, area: ratatui::prelude::Rect, buf: &mut Buffer) {
         let vertical = Layout::default()
             .direction(Direction::Vertical)
             .constraints([Constraint::Min(1), Constraint::Length(1)])
